@@ -263,7 +263,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 	    vector<string> set;
 	    
 	    if (cmds.at(j) == "(") {
-	    	j += 1;
+	    	++j;
 	    	status = functionality(cmds, j);
 	    }
 	    
@@ -272,8 +272,6 @@ bool functionality (vector<string> cmds, unsigned &j) {
 	    //Base case command
 	    if ((j != 0 && cmds.at(j - 1) != ")") || j == 0) {
 		    for(; j < cmds.size(); ++j) {
-		    	
-		    	
 		    	
 		    	if ((cmds.at(j) != "||") &&
 		    		(cmds.at(j) != "&&") &&
@@ -289,6 +287,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 		    		}
 		    }
 	    }
+	    
 		//DEBUGGING PURPOSES: UNCOMMENT TO SEE ALL THE PARSED COMMENTS	    
 	    // cout << "-------------SET HAS (1)------------------" << endl;
 	    // for(unsigned int i = 0; i < set.size(); i++)
@@ -315,35 +314,70 @@ bool functionality (vector<string> cmds, unsigned &j) {
 		}
 		else
 		{
-			    
-		    status = rshell(set);
-		    set.clear();
+			if(!set.empty()) {    
+			    status = rshell(set);
+			    set.clear();
+			}
 		}
+		
 	    //loading in successive commands after base case
-	    for(int i = j; i < static_cast<int>(cmds.size()); i++)
+	    for(; j < cmds.size(); ++j)
 	    {
-	    	if (cmds.at(j) == "(") {
-	    	j += 1;
-	    	status = functionality(cmds, j);
-	    	i = (int)j;
+	    	if(!set.empty() && cmds.at(j) == "(" ) {
+	    		if(set.at(0) == "||" && status == false) {
+			    	set.clear();
+			    	++j;
+			    	status = functionality(cmds, j);
+	    		}
+	    		else if(set.at(0) == "&&" && status == true) {
+	    			set.clear();
+			    	++j;
+			    	status = functionality(cmds, j);
+	    		}
+	    		else if(set.at(0) == ";") {
+	    			set.clear();
+	    			++j;
+	    			status = functionality(cmds, j);
+	    		}
+	    		else {
+	    			set.clear();
+	    			while (cmds.at(j) != ")") ++j;
+	    		}
 	    	}
 	    	
 	    	if(j >= cmds.size()) return status;
 	    	
-	    	if (cmds.at(i) == ")") {
-	    		j = i + 1;
-	    		return status;
+	    	if (!set.empty() && cmds.at(j) == ")") {
+	    		++j;
+	    		
+	    		if(set.at(0) == "||" && status == false) {
+			    	popfront();
+			    	return rshell(set);
+	    		}
+	    		else if(set.at(0) == "&&" && status == true) {
+	    			popfront();
+			    	return rshell(set);
+	    		}
+	    		else if(set.at(0) == ";") {
+	    			popfront();
+	    			return rshell(set);
+	    		}
+	    		else {
+	    			set.clear();
+	    			return status;
+	    		}
 	    	}
-	    	set.push_back(cmds.at(i));
 	    	
-	    	if (set.size() > 1 && (cmds.at(i) == "||" || 
-	    						   cmds.at(i) == "&&" || 
-	    						   cmds.at(i) == ";"  ||
-	    						   cmds.at(i) == "#")) 
+	    	set.push_back(cmds.at(j));
+	    	
+	    	if (set.size() > 1 && (cmds.at(j) == "||" || 
+	    						   cmds.at(j) == "&&" || 
+	    						   cmds.at(j) == ";"  ||
+	    						   cmds.at(j) == "#")) 
 	    	{
 			    if(set.at(0) == ";")
 			    {
-			    	--i;
+			    	--j;
 			    	set.pop_back();
 			    	popfront();
 			    	
@@ -353,7 +387,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 			    }	
 			    else if(set.at(0) == "&&")
 			    {
-			    	--i;
+			    	--j;
 			    	set.pop_back();
 			    	popfront();
 			    	
@@ -366,7 +400,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 			    }
 			    else if(set.at(0) == "||")
 			    {
-			    	--i;
+			    	--j;
 			    	set.pop_back();
 			    	popfront();
 			    	
@@ -436,7 +470,7 @@ int main()
 			bool statement = false;
 			bool statement2 = false;
 			bool statement3 = false;
-			// bool statement4 = false;
+			bool statement4 = false;
 			
 			int parenCheckerO = 0;
 			int parenCheckerC = 0;
@@ -449,29 +483,33 @@ int main()
 							if (command.at(stateChecker) == ')') break;
 						}
 					if (statement3) {reset = true; break;}
+					if (command.at(parenChecker) == '#') break;
 					if (command.at(parenChecker) == ')') {
 						++parenCheckerC;
-					// 	if( parenChecker + 1 < command.size()) {
-					// 		if (command.at(parenChecker + 1) != ';' || 
-					// 			command.at(parenChecker + 1) != '#' || 
-					// 			command.at(parenChecker + 1) != ')'	||) {
-					// 			if( parenChecker + 2 < command.size()) {
-					// 				if ((command.at(parenChecker + 1) == '|' && command.at(parenChecker + 2) != '|') ||
-					// 	                (command.at(parenChecker + 1) == '&' && command.at(parenChecker + 2) != '&')   ) {
-						// 				else if (command.at(parenChecker + 2) != ';' || 
-						// 						 command.at(parenChecker + 2) != '#' || 
-						// 						 command.at(parenChecker + 2) != ')' ||) {
-						//						if( parenChecker + 3 < command.size()) {
-						// 							if ((command.at(parenChecker + 2) == '|' && command.at(parenChecker + 3) != '|') ||
-						// 	             				(command.at(parenChecker + 2) == '&' && command.at(parenChecker + 3) != '&') ){statement4 = true; reset = true;}
-						//						}
-						//						else {statement4 = true; reset = true;}
-						// 				}
-					//				}
-					// 			}
-					// 			else {statement4 = true; reset = true;}
-					// 		}
-					//  }
+						if( parenChecker + 1 < command.size()) {
+							if (command.at(parenChecker + 1) != ';' && 
+								command.at(parenChecker + 1) != '#' && 
+								command.at(parenChecker + 1) != ')'	  ) {
+								if( parenChecker + 2 < command.size()) {
+									if (((command.at(parenChecker + 1) == '|' && command.at(parenChecker + 2) != '|') &&
+						                (command.at(parenChecker + 1) == '&' && command.at(parenChecker + 2) != '&')) ||
+						                 command.at(parenChecker + 1) == ' ') {
+										if (command.at(parenChecker + 2) != ';' && 
+											command.at(parenChecker + 2) != '#' && 
+											command.at(parenChecker + 2) != ')'   ) {
+											if( parenChecker + 3 < command.size() && 
+												(command.at(parenChecker + 2) == '|' ||
+												 command.at(parenChecker + 2) == '&'   ) ) {
+												if ((command.at(parenChecker + 2) == '|' && command.at(parenChecker + 3) != '|') &&
+							             			(command.at(parenChecker + 2) == '&' && command.at(parenChecker + 3) != '&') ){statement4 = true; reset = true;}
+											}
+											else {statement4 = true; reset = true;}
+										}
+									}
+								}
+								else {statement4 = true; reset = true;}
+							}
+					 	}
 					}
 				}
 				if (parenCheckerO != parenCheckerC) {reset = true; statement3 = true;}
@@ -487,7 +525,7 @@ int main()
 			if(statement) cout << "bash: syntax error near unexpected token `;\'" << endl;
 			else if(statement2) cout << "bash: syntax error near unexpected token `" << command.at(0) << command.at(1) << "\'" << endl;
 			else if(statement3) cout << "bash: syntax error near unexpected token `)\'" << endl;
-			// else if(statement4) cout << "bash: syntax error after token `)\'" << endl;
+			else if(statement4) cout << "bash: syntax error after token `)\'" << endl;
 			if(reset) command.clear();
 		}
 	
@@ -531,7 +569,7 @@ int main()
 	    }
 	   	
 	   	
-	   	//DEBUGGING PURPOSES: UNCOMMENT TO SEE ALL THE PARSED COMMENTS	    
+	   	// //DEBUGGING PURPOSES: UNCOMMENT TO SEE ALL THE PARSED COMMENTS	    
 	    // cout << "-------------CommentS HAS---------------------" << endl;
 	    // for(unsigned int i = 0; i < comment.size(); i++)
 	    // {
@@ -550,7 +588,6 @@ int main()
 	    	//Filter ';'
 	    	else if(comment.at(i).find(';') != string::npos && comment.at(i).size() != 1)
 	    	{
-	    		cout << "What is my comment: " << comment.at(i) << endl;
 	    		int s_index = 0;
 	    		for(unsigned int j = 0; j < comment.at(i).size(); j++)
 		    	{
@@ -568,11 +605,62 @@ int main()
 		    		else
 		    		{
 			    	 	string breaker = comment.at(i).substr(j, comment.at(i).size() - j);
-			    	 	//cout << "Breaker: " << breaker << endl;
 		    			cmds.push_back(breaker);
 		    			break;
 		    		}
-		    		//cout << "currently: " << j << endl;
+		    	}
+	    	}
+	    	//Filter "&&"
+	    	else if(comment.at(i).find("&&") != string::npos && comment.at(i).size() != 1)
+	    	{
+	    		int s_index = 0;
+	    		for(unsigned int j = 0; j < comment.at(i).size(); j++)
+		    	{
+
+		    		if(comment.at(i).find("&&", j) != string::npos)
+		    		{
+			    	 	j = comment.at(i).find("&&", j);
+			    	 	//Found/Parse/Push
+			    	 	string breaker = comment.at(i).substr(s_index, j - s_index);
+			    	 	string a = comment.at(i).substr(j, 2);
+
+			    	 	s_index = (j + 2);
+			    	 	if (breaker != "") cmds.push_back(breaker);
+			    	 	cmds.push_back(a);
+			    	 	j += 1;
+		    		}
+		    		else
+		    		{
+			    	 	string breaker = comment.at(i).substr(j, comment.at(i).size() - j);
+		    			cmds.push_back(breaker);
+		    			break;
+		    		}
+		    	}
+	    	}
+	    	//Filter "||"
+	    	else if(comment.at(i).find("||") != string::npos && comment.at(i).size() != 1)
+	    	{
+	    		int s_index = 0;
+	    		for(unsigned int j = 0; j < comment.at(i).size(); j++)
+		    	{
+
+		    		if(comment.at(i).find("||", j) != string::npos)
+		    		{
+			    	 	j = comment.at(i).find("||", j);
+			    	 	//Found/Parse/Push
+			    	 	string breaker = comment.at(i).substr(s_index, j - s_index);
+			    	 	string a = comment.at(i).substr(j, 2);
+			    	 	s_index = (j + 2);
+			    	 	if (breaker != "") cmds.push_back(breaker);
+			    	 	cmds.push_back(a);
+			    	 	j += 1;
+		    		}
+		    		else
+		    		{
+			    	 	string breaker = comment.at(i).substr(j, comment.at(i).size() - j);
+		    			cmds.push_back(breaker);
+		    			break;
+		    		}
 		    	}
 	    	}
 	    	else
@@ -580,6 +668,7 @@ int main()
 	    		cmds.push_back(comment.at(i));
 	    	}
 	    }
+		
 		
 		
 		//DEBUGGING PURPOSES: UNCOMMENT TO SEE ALL THE PARSED COMMENTS	    
