@@ -691,7 +691,6 @@ int main()
     	
 		//retrieve line and test incorrect line cases
 		while (command.empty()) {
-			cout << "Heilii@Alexina.Server $ ";
 			getline(cin, command);
 			bool reset = false;
 			bool statement = false;
