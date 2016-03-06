@@ -1,7 +1,8 @@
 #!/bin/sh
 
-cd ../src
-g++ rshell.cpp
+cd ..
+make
+cd src
 #printf "Begin single command tests: \n\n"
 ../bin/./rshell << 'EOF'
 ls -a # ls -l

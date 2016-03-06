@@ -22,6 +22,15 @@ Once cloned, enter a shell and type `cd rshell` to enter the project directory.
     - Usage Structure: `[command]` `[argument(s)]` `[connector]` `[...]`.
     - Typing the `exit` command closes the executable.
 
+Updates
+-----------------------------
+- Version 1.1:
+    - fixed spacing problems when using connectors
+    - added `()` or precedence operators
+    - added `test` functionality
+        - (use: `test` `[flag]` `[file_or_directory_name]`)
+    - added `[]` for use of the test functionality
+        - (proper use: `[ [flag] [file_or_directory_name] ]`)
 
 Bugs/Known Issues/Limitations
 -----------------------------
@@ -30,6 +39,8 @@ Bugs/Known Issues/Limitations
 * In addition to the `cd` command having trouble in relation to recognizing directories, any other directory related command will fail to execute (ex: `ls` `[directory_name]`)
 * The username and server identifier for the process line does not always appear on all stations when rshell is executing.
 * When chaining a large number of improper commands using the `||` connector, not all error messages from `execvp()` will always be shown.
+* When using parentheses, rshell will not be able to properly process input 2 spaces after the closing parentheses and will return an error.
+* When using parentheses, having a larger number of open parentheses will not prompt the user for further input but will only return an error and ask for new input.
 
 ###io redirection
 * Our input and output redirection does not work. (ex: `echo [string] > [file_name]` is unable to make a new file )
