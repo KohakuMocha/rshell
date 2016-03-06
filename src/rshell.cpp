@@ -418,7 +418,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 		    		else break;
 		    }
 	    }
-		
+		// check for test command cases
 		if(!set.empty() && (set.at(0) == "test" || set.at(0) == "["))
 		{
 			status = test(set);
@@ -444,6 +444,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 	    //loading in successive commands after base case
 	    for(; j < cmds.size(); ++j)
 	    {
+		// beginning of next recursive move if applicable
 	    	if(!set.empty() && cmds.at(j) == "(" ) {
 	    		if(set.at(0) == "||" && status == false) {
 			    	set.clear();
@@ -468,6 +469,7 @@ bool functionality (vector<string> cmds, unsigned &j) {
 	    	
 	    	if(j >= cmds.size()) return status;
 	    	
+		//closed parentheses usage
 	    	if (!set.empty() && cmds.at(j) == ")") {
 	    		++j;
 	    		
@@ -610,7 +612,9 @@ int main()
 			int parenCheckerO = 0;
 			int parenCheckerC = 0;
 			
+			//catch block for error catching prior to parsing (requires new input every time)
 			if(!command.empty()) {
+				//check for parentheses prior to parsing
 				for(unsigned parenChecker = 0; parenChecker < command.size(); ++parenChecker) {
 					if (command.at(parenChecker) == '(') {++parenCheckerO; statement3 = true;}
 						for(unsigned stateChecker = parenChecker + 1; stateChecker < command.size(); ++ stateChecker) {
@@ -621,6 +625,8 @@ int main()
 					if (command.at(parenChecker) == '#') break;
 					if (command.at(parenChecker) == ')') {
 						++parenCheckerC;
+
+						//checks for errors following closed parentheses (is only able to check two spots forward)
 						if( parenChecker + 1 < command.size()) {
 							if (command.at(parenChecker + 1) != ';' && 
 								command.at(parenChecker + 1) != '#' && 
@@ -648,8 +654,12 @@ int main()
 					}
 				}
 				if (parenCheckerO != parenCheckerC) {reset = true; statement3 = true;}
+
+				//checks for empty inpute errors
 				if (command.at(0) == ' ') reset = true;
 				if(command.at(0) == '	') reset = true;
+				
+				//checks for connector input errors
 				if(command.at(0) == '#') reset = true;
 				if(command.at(0) == ';') {reset = true; statement = true;} 
 				if(command.size() > 1) {
@@ -657,6 +667,8 @@ int main()
 					if(command.at(0) == '&' && command.at(1) == '&') {reset = true; statement2 = true;}
 				}
 			}
+			
+			//statement outputs for errors
 			if(statement) cout << "bash: syntax error near unexpected token `;\'" << endl;
 			else if(statement2) cout << "bash: syntax error near unexpected token `" << command.at(0) << command.at(1) << "\'" << endl;
 			else if(statement3) cout << "bash: syntax error near unexpected token `)\'" << endl;
